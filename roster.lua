@@ -22,6 +22,16 @@ function Roster:Disable()
 end
 
 
+function Roster:FindUser(name)
+    for i=1, #self.roster do
+        if self.roster[i].name == name then
+            return self.roster[i].user
+        end
+    end
+    return nil
+end
+
+
 function Roster:GetRoster()
     return self.roster
 end
@@ -32,8 +42,7 @@ function Roster:GuildRosterUpdate()
     local total_guild_members = GetNumGuildMembers()
     local roster = {}
 
-    for i=1,total_guild_members,1
-    do
+    for i=1,total_guild_members do
         local name, rank, rankIndex, level, class, zone, note,
               officernote, online, status, classFileName,
               achievementPoints, achievementRank,
@@ -56,8 +65,7 @@ function Roster:GuildRosterUpdate()
 end
 
 
-
-function Roster:SetOnUpdateCallBack(cb)
+function Roster:SetOnUpdate(cb)
     self.on_update_cb = cb
 end
 
@@ -68,5 +76,5 @@ function Roster:OnEvent(event, arg1)
     end
 end
 
-Roster.event_frame:RegisterEvent("GUILD_ROSTER_UPDATE")
+
 Roster.event_frame:SetScript("OnEvent", Roster.OnEvent)

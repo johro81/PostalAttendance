@@ -6,6 +6,9 @@ Core.event_frame = CreateFrame("Frame", "PostalAttendance_CoreEventFrame")
 
 function Core:Init()
     self.roster = PostalAttendance_Roster
+    self.tracker = PostalAttendance_Tracker
+    self.tracker:Init()
+    self.tracker:SetRoster(self.roster)
 end
 
 
