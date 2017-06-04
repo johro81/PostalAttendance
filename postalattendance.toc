@@ -1,4 +1,4 @@
-## Interface: 60200
+## Interface: 11200
 ## Title: Postal Attendance
 ## Notes: Raid attendance tracking for Postal
 ## Author: Nuqneh
@@ -6,6 +6,7 @@
 ## SavedVariables: PostalAttendanceDB
 ## Version: 0.1.0
 
+helpers.lua
 roster.lua
 tracker.lua
 core.lua

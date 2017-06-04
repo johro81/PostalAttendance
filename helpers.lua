@@ -1,15 +1,15 @@
-PA_Helpers = {
-  debug = True,
+PostalAttendance_Helpers = {
+    debug = True,
 }
 
-local H = PA_Helpers
+local H = PostalAttendance_Helpers
 
-function H:Print(...)
-
+function H:Print(msg)
+    ChatFrame1:AddMessage(msg)
 end
 
-function H:Debug(...)
-  if self.debug then
-        
-  end
+function H:Debug(msg)
+    if self.debug then
+        ChatFrame1:AddMessage(msg)
+    end
 end 

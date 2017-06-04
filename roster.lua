@@ -4,6 +4,7 @@ local Roster = PostalAttendance_Roster
 Roster.event_frame = CreateFrame("Frame", "PostalAttendance_RosterEventFrame")
 Roster.roster = {}
 Roster.on_update_cb = function() end
+Roster.print = PostalAttendance_Helpers.Print
 
 
 function Roster:Update()
@@ -23,7 +24,7 @@ end
 
 
 function Roster:FindUser(name)
-    for i=1, #self.roster do
+    for i=1, table.getn(self.roster) do
         if self.roster[i].name == name then
             return self.roster[i].user
         end
