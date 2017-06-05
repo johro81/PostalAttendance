@@ -4,11 +4,22 @@ local Roster = PostalAttendance_Roster
 Roster.event_frame = CreateFrame("Frame", "PostalAttendance_RosterEventFrame")
 Roster.roster = {}
 Roster.on_update_cb = function() end
-Roster.print = PostalAttendance_Helpers.Print
+
+--
+-- Helper functions
+--
+
+
+local print = PostalAttendance_Helpers.Print
+
+
+--
+-- Member functions
+--
 
 
 function Roster:Update()
-    self:print("PostalAttendance.Roster Update()")
+    print("PostalAttendance.Roster Update()")
     self.event_frame:RegisterEvent("GUILD_ROSTER_UPDATE")
     GuildRoster()
 end
@@ -51,7 +62,7 @@ end
 
 
 function Roster:GUILD_ROSTER_UPDATE()
-    self:print("PostalAttendance.Roster GuildRosterUpdate()")
+    print("PostalAttendance.Roster GuildRosterUpdate()")
     self:Disable()
     local total_guild_members = GetNumGuildMembers()
     local roster = {}

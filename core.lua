@@ -2,8 +2,20 @@ PostalAttendance_Core = {}
 
 local Core = PostalAttendance_Core
 Core.event_frame = CreateFrame("Frame", "PostalAttendance_CoreEventFrame")
-Core.print = PostalAttendance_Helpers.Print
 Core.command_list = {}
+
+
+--
+-- Helper functions
+--
+
+
+local print = PostalAttendance_Helpers.Print
+
+
+--
+-- Member functions
+--
 
 
 function Core:PopulateCommandList()
@@ -17,7 +29,7 @@ end
 
 
 function Core:Init()
-    self:print("PostalAttendance init()")
+    print("PostalAttendance init()")
     self.roster = PostalAttendance_Roster
     self.tracker = PostalAttendance_Tracker
     self.tracker:Init()
@@ -45,7 +57,7 @@ end
 
 
 function Core:SlashCommandHelp()
-    self:print("Postal Attendance Help!")
+    print("Postal Attendance Help!")
 end
 
 
