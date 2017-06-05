@@ -39,7 +39,18 @@ function Roster:GetRoster()
 end
 
 
-function Roster:GuildRosterUpdate()
+
+function Roster:SetOnUpdate(cb)
+    self.on_update_cb = cb
+end
+
+
+--
+-- Event handling
+--
+
+
+function Roster:GUILD_ROSTER_UPDATE()
     self:print("PostalAttendance.Roster GuildRosterUpdate()")
     self:Disable()
     local total_guild_members = GetNumGuildMembers()
@@ -67,22 +78,6 @@ function Roster:GuildRosterUpdate()
     self.on_update_cb()
 end
 
-
-function Roster:SetOnUpdate(cb)
-    self.on_update_cb = cb
-end
-
-
-function Roster:OnEvent(event, arg1)
-    self:print("PostalAttendance.Roster OnEvent("
-        .. tostring(event) .. ", " .. tostring(arg1) .. ")")
-
-    if event == "GUILD_ROSTER_UPDATE" then
-        self:GuildRosterUpdate(arg1)
-    end
-end
-
-
 Roster.event_frame:SetScript(
     "OnEvent",
-    function() Roster:OnEvent(event, arg1) end)
+    function() Roster[event](Roster) end)

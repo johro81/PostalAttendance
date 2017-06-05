@@ -139,7 +139,12 @@ function Tracker:OnRosterUpdate()
 end
 
 
-function Tracker:TimerOnUpdate()
+--
+-- Event handling
+--
+
+
+function Tracker:ON_UPDATE()
     if not Tracker.state.is_running then
         return
     end
@@ -173,4 +178,4 @@ end
 Tracker.timer_frame = CreateFrame("Frame")
 Tracker.timer_frame:SetScript(
     "OnUpdate",
-    function(...) Tracker:TimerOnUpdate() end)
+    function() Tracker:ON_UPDATE() end)

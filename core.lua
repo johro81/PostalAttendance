@@ -30,6 +30,7 @@ end
 -- Slash command handling
 --
 
+
 function Core:SlashCommandHandler(msg)
     local _, _, cmd, args = string.find(msg, "^(%S+) *(.*)");
 
@@ -52,20 +53,14 @@ end
 -- Event handling
 --
 
-function Core:ADDON_LOADED(name)
-    if name ~= "PostalAttendance" then
+
+function Core:ADDON_LOADED()
+    if arg1 ~= "PostalAttendance" then
         return
     end
 
     self:Init()
     self.event_frame:UnregisterEvent("ADDON_LOADED")
-end
-
-
-function Core:OnEvent(event, arg1)
-    if event == "ADDON_LOADED" then
-        self:ADDON_LOADED(arg1)
-    end
 end
 
 
@@ -75,4 +70,4 @@ SlashCmdList["POSTALATTENDANCE"] = function(msg)
     Core:SlashCommandHandler(msg) end
 
 Core.event_frame:RegisterEvent("ADDON_LOADED")
-Core.event_frame:SetScript("OnEvent", function() Core:OnEvent(event, arg1) end)
+Core.event_frame:SetScript("OnEvent", function() Core[event](Core) end)
