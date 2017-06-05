@@ -12,6 +12,7 @@ Tracker.state = {
     new_snapshot = 0,
     is_taking_snapshot = false,
     is_running = false,
+    last_update = GetTime(),
 }
 Tracker.print = PostalAttendance_Helpers.Print
 
@@ -35,9 +36,12 @@ function Tracker:Init()
     if self.db.state then
         Tracker.state = self.db.state
     end
+end
 
+
+function Tracker:ShowRanks()
     self:print("Main raider ranks:")
-    for _k, v in ipairs(self.db.raider_ranks) do
+    for k, v in ipairs(self.db.raider_ranks) do
         self:print(" - [" .. v .. "]: " .. GuildControlGetRankName(v))
     end
 
@@ -50,7 +54,7 @@ end
 
 function Tracker:SetRoster(roster)
     self.roster = roster
-    self.roster:SetOnUpdate(self.OnRosterUpdate)
+    self.roster:SetOnUpdate(function() self:OnRosterUpdate() end)
 end
 
 
@@ -58,12 +62,13 @@ function Tracker:Start(desc)
     self:print("Tracker:Start()")
     local attendance = {
         desc = desc,
-        timestamp = GetServerTime(),
+        timestamp = nil,
         snapshots = {}
     }
 
     table.insert(self.db.attendance, attendance)
     self.state.is_running = true
+    self.state.last_update = GetTime()
     self:StartTakingSnapshot()
 end
 
@@ -74,10 +79,9 @@ function Tracker:StartTakingSnapshot()
     self.state.cur_snapshot = 0
 
     local snapshot = {
-        timestamp = GetServerTime(),
+        timestamp = nil,
         users = {}
     }
-
 
     local i = getn(Tracker.db.attendance)
     local snapshots = Tracker.db.attendance[i].snapshots
@@ -112,7 +116,7 @@ function Tracker:OnRosterUpdate()
         local user = roster[i]
         if user.online then
             -- Check if user is an alt that can be mapped to a main raider
-            if tContains(self.db.alt_ranks, user.rank_index) then
+            if self.db.alt_ranks[user.rank_index] then
                 main = self.roster:FindUser(user.note)
                 if main == nil then
                     -- self:print("No raider found for alt " .. user.name ..
@@ -123,8 +127,8 @@ function Tracker:OnRosterUpdate()
             end
 
             -- Add main raider to attendance
-            if tContains(self.db.raider_ranks, user.rank_index) then
-                if not tContains(snapshot.users, user.name) then
+            if self.db.raider_ranks[user.rank_index] then
+                if not snapshot.users[user.name] then
                     table.insert(snapshot.users, user.name)
                 end
             end
@@ -135,28 +139,38 @@ function Tracker:OnRosterUpdate()
 end
 
 
-function Tracker:TimerOnUpdate(elapsed)
+function Tracker:TimerOnUpdate()
     if not Tracker.state.is_running then
         return
     end
 
-    Tracker.state.roster_update = Tracker.state.roster_update + elapsed
-    Tracker.state.new_snapshot = Tracker.state.new_snapshot + elapsed
-    Tracker.state.cur_snapshot = Tracker.state.cur_snapshot + elapsed
+    local elapsed = GetTime() - self.state.last_update
 
-    if Tracker.state.is_taking_snapshot then
-        if Tracker.state.cur_snapshot >= 300 then
-            Tracker:StopTakingSnapshot()
-            Tracker.state.cur_snapshot = 0
-        elseif Tracker.state.roster_update >= 60 then
-            Tracker.roster:Update()
-            Tracker.state.roster_update = 0
-        end
-    elseif Tracker.state.new_snapshot >= 900 then
-        Tracker:StartTakingSnapshot()
-        Tracker.state.new_snapshot = 0
+    if elapsed < 1 then
+        return
     end
+
+    self.state.roster_update = self.state.roster_update + elapsed
+    self.state.new_snapshot = self.state.new_snapshot + elapsed
+    self.state.cur_snapshot = self.state.cur_snapshot + elapsed
+
+    if self.state.is_taking_snapshot then
+        if self.state.cur_snapshot >= 300 then
+            self:StopTakingSnapshot()
+            self.state.cur_snapshot = 0
+        elseif self.state.roster_update >= 60 then
+            self.roster:Update()
+            self.state.roster_update = 0
+        end
+    elseif self.state.new_snapshot >= 900 then
+        self:StartTakingSnapshot()
+        self.state.new_snapshot = 0
+    end
+
+    self.state.last_update = GetTime()
 end
 
 Tracker.timer_frame = CreateFrame("Frame")
-Tracker.timer_frame:SetScript("OnUpdate", Tracker.TimerOnUpdate)
+Tracker.timer_frame:SetScript(
+    "OnUpdate",
+    function(...) Tracker:TimerOnUpdate() end)

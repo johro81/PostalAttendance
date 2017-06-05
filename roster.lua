@@ -8,6 +8,7 @@ Roster.print = PostalAttendance_Helpers.Print
 
 
 function Roster:Update()
+    self:print("PostalAttendance.Roster Update()")
     self.event_frame:RegisterEvent("GUILD_ROSTER_UPDATE")
     GuildRoster()
 end
@@ -39,6 +40,7 @@ end
 
 
 function Roster:GuildRosterUpdate()
+    self:print("PostalAttendance.Roster GuildRosterUpdate()")
     self:Disable()
     local total_guild_members = GetNumGuildMembers()
     local roster = {}
@@ -72,10 +74,15 @@ end
 
 
 function Roster:OnEvent(event, arg1)
+    self:print("PostalAttendance.Roster OnEvent("
+        .. tostring(event) .. ", " .. tostring(arg1) .. ")")
+
     if event == "GUILD_ROSTER_UPDATE" then
-        Roster:GuildRosterUpdate(arg1)
+        self:GuildRosterUpdate(arg1)
     end
 end
 
 
-Roster.event_frame:SetScript("OnEvent", Roster.OnEvent)
+Roster.event_frame:SetScript(
+    "OnEvent",
+    function() Roster:OnEvent(event, arg1) end)
