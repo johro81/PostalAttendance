@@ -3,8 +3,8 @@ PostalAttendance_Tracker = {}
 local Tracker = PostalAttendance_Tracker
 Tracker.roster = {}
 Tracker.default = {
-    raider_ranks = { 1, 2, 3, 4, 5, 6 },
-    alt_ranks = { 7, 8 }
+    raider_ranks = { 1, 2, 4, 5, 6 },
+    alt_ranks = { 3, 7 }
 }
 Tracker.state = {
     roster_update = 0,
@@ -14,7 +14,20 @@ Tracker.state = {
     is_running = false,
     last_update = GetTime(),
 }
-Tracker.print = PostalAttendance_Helpers.Print
+
+
+--
+-- Helper functions
+--
+
+
+local print = PostalAttendance_Helpers.Print
+local tContains = PostalAttendance_Helpers.TableContains
+
+
+--
+-- Member functions
+--
 
 
 function Tracker:ClearAllData()
@@ -40,14 +53,14 @@ end
 
 
 function Tracker:ShowRanks()
-    self:print("Main raider ranks:")
+    print("Main raider ranks:")
     for k, v in ipairs(self.db.raider_ranks) do
-        self:print(" - [" .. v .. "]: " .. GuildControlGetRankName(v))
+        print(" - [" .. v .. "]: " .. GuildControlGetRankName(v))
     end
 
-    self:print("Main raider alt ranks:")
+    print("Main raider alt ranks:")
     for _, v in ipairs(self.db.alt_ranks) do
-        self:print(" - [" .. v .. "]: " .. GuildControlGetRankName(v))
+        print(" - [" .. v .. "]: " .. GuildControlGetRankName(v))
     end
 end
 
@@ -59,7 +72,7 @@ end
 
 
 function Tracker:Start(desc)
-    self:print("Tracker:Start()")
+    print("Tracker:Start()")
     local attendance = {
         desc = desc,
         timestamp = nil,
@@ -74,7 +87,7 @@ end
 
 
 function Tracker:StartTakingSnapshot()
-    self:print("Tracker:StartTakingSnapshot()")
+    print("Tracker:StartTakingSnapshot()")
     self.state.roster_update = 0
     self.state.cur_snapshot = 0
 
@@ -93,19 +106,20 @@ end
 
 
 function Tracker:Stop()
-    self:print("Tracker:Stop()")
+    print("Tracker:Stop()")
     self:StopTakingSnapshot()
     self.state.is_running = false
 end
 
+
 function Tracker:StopTakingSnapshot()
-    self:print("Tracker:StopTakingSnapshot()")
+    print("Tracker:StopTakingSnapshot()")
     self.state.is_taking_snapshot = false
 end
 
 
 function Tracker:OnRosterUpdate()
-    self:print("Tracker:OnRosterUpdate()")
+    print("Tracker:OnRosterUpdate()")
     local self = Tracker
     local roster = self.roster:GetRoster()
 
@@ -115,11 +129,15 @@ function Tracker:OnRosterUpdate()
     for i=1, getn(roster) do
         local user = roster[i]
         if user.online then
+            -- Rank index off by one
+            local user_rank_index = user.rank_index + 1
+
+
             -- Check if user is an alt that can be mapped to a main raider
-            if self.db.alt_ranks[user.rank_index] then
+            if tContains(self.db.alt_ranks, user_rank_index) then
                 main = self.roster:FindUser(user.note)
                 if main == nil then
-                    -- self:print("No raider found for alt " .. user.name ..
+                    -- print("No raider found for alt " .. user.name ..
                     --       ", please check note: [" .. user.note .. "].")
                 else
                     user = main
@@ -127,15 +145,15 @@ function Tracker:OnRosterUpdate()
             end
 
             -- Add main raider to attendance
-            if self.db.raider_ranks[user.rank_index] then
-                if not snapshot.users[user.name] then
+            if tContains(self.db.raider_ranks, user_rank_index) then
+                if not tContains(snapshot.users, user.name) then
                     table.insert(snapshot.users, user.name)
                 end
             end
         end -- if user.online then
     end -- for i=1, getn(roster) do
 
-    self:print("Users gotten attendance: " .. getn(snapshot.users))
+    print("Users gotten attendance: " .. getn(snapshot.users))
 end
 
 
